@@ -8,7 +8,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="E-Clarx Chatbot API",
-    description="AI-powered chatbot backend for law firms and small businesses",
+    description="AI-powered chatbot backend for businesses — FirmChat by E-Clarx",
     version="1.0.0",
 )
 
