@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 import anthropic
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -8,6 +9,8 @@ from app.models.conversation import ConversationHistory
 from app.schemas.chat import ChatRequest, ChatResponse, ConversationMessage
 from app.prompts import get_system_prompt
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -55,7 +58,11 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         reply = response.content[0].text
 
     except anthropic.APIError as e:
+        logger.error(f"Anthropic API error: {e}")
         raise HTTPException(status_code=502, detail=f"Anthropic API error: {str(e)}")
+    except Exception as e:
+        logger.error(f"Unexpected error in /chat: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {str(e)}")
 
     # --- 4. Save user message + assistant reply to DB ---
     db.add(ConversationHistory(
